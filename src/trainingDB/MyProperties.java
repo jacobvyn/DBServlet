@@ -12,7 +12,9 @@ public class MyProperties {
 	
 	public MyProperties() throws FileNotFoundException, IOException {
 		Properties prop = new Properties();
-		prop.load(new FileInputStream(new File("D:\\Education\\Java eclipse\\DBServlet\\info.txt")));
+		FileInputStream in = new FileInputStream(new File("D:\\Education\\Java eclipse\\DBServlet\\info.txt"));
+		prop.load(in);
+		in.close();
 		
 		login = prop.getProperty("login");
 		password = prop.getProperty("pass");
