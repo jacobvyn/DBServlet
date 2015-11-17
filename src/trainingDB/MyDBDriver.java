@@ -1,16 +1,19 @@
 package trainingDB;
 
-
 import java.io.FileNotFoundException;
-
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MyDBDriver {
 
@@ -24,15 +27,15 @@ public class MyDBDriver {
 	}
 
 	private void getConnectionToDB() {
-		
+
 		if (connect == null) {
 			try {
 				propertie = new MyProperties();
 				Class.forName("org.postgresql.Driver");
-				
+
 				connect = DriverManager.getConnection(dbURL, propertie.getLogin(), propertie.getPassword());
-			//	connect = DriverManager.getConnection(dbURL, "postgres", "pass123");
-			
+				// connect = DriverManager.getConnection(dbURL, "postgres",
+				// "pass123");
 
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -51,7 +54,7 @@ public class MyDBDriver {
 			try {
 				connect.close();
 			} catch (SQLException e) {
-				
+
 				System.out.println("Exception by closing connect!");
 				e.printStackTrace();
 			}
@@ -59,42 +62,41 @@ public class MyDBDriver {
 
 	}
 
-	public ResultSet getResultSet() {
-		ResultSet rs = null;
-		try {
-			Statement statement = connect.createStatement();
-			rs = statement.executeQuery("SELECT * FROM " + tableName);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return rs;
-	}
-
-	public JsonArray getJsonResultSet() {
-		if (connect==null){
+	/*
+	 * public ResultSet getResultSet() { ResultSet rs = null; try { Statement
+	 * statement = connect.createStatement(); rs = statement.executeQuery(
+	 * "SELECT * FROM " + tableName); } catch (SQLException e) {
+	 * e.printStackTrace(); } return rs; }
+	 */
+	public JSONArray getJSONResultSet() {
+		if (connect == null) {
 			System.out.println("Connection ==null");
 		}
-		
-		JsonArray jArray = null;
+
+		JSONArray jArray = null;
 		try (Statement statement = connect.createStatement()) {
 			ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
-			jArray = new JsonArray();
+			jArray = new JSONArray();
 			while (rs.next()) {
-				JsonObject jDB = new JsonObject();
-				jDB.addProperty("USER_ID", rs.getInt(1));
-				jDB.addProperty("FIRSTNAME", rs.getString("firstname"));
-				jDB.addProperty("LASTNAME", rs.getString("lastname"));
+				JSONObject jDB = new JSONObject();
+
+				jDB.put("USER_ID", rs.getInt(1));
+				jDB.put("FIRSTNAME", rs.getString("firstname"));
+				jDB.put("LASTNAME", rs.getString("lastname"));
 
 				DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
 				String b_day = df.format(rs.getDate("birth_day"));
-				jDB.addProperty("BIRTH_DAY", b_day);
-				
-				jDB.addProperty("JOB", rs.getString("job"));
-				jDB.addProperty("COMMENT", rs.getString("comment"));
-				jArray.add(jDB);
+				jDB.put("BIRTH_DAY", b_day);
+
+				jDB.put("JOB", rs.getString("job"));
+				jDB.put("COMMENT", rs.getString("comment"));
+				jArray.put(jDB);
 			}
 			rs.close();
 		} catch (SQLException e) {
+			System.out.println("Exception from method getJson");
+			e.printStackTrace();
+		} catch (JSONException e) {
 			System.out.println("Exception from method getJson");
 			e.printStackTrace();
 		}
@@ -105,11 +107,12 @@ public class MyDBDriver {
 		try (Statement statement = connect.createStatement()) {
 
 			String updSQL = "";
-			
+
 			for (int i = 0; i < fields.length; i++) {
-				updSQL = "UPDATE " + tableName + " SET " + fields[i] + " = '" + values[i] + "' WHERE user_id = " + user_id ;
+				updSQL = "UPDATE " + tableName + " SET " + fields[i] + " = '" + values[i] + "' WHERE user_id = "
+						+ user_id;
 				System.out.println("--------------------");
-				System.out.println("UPDATE REQUEST : " +updSQL);
+				System.out.println("UPDATE REQUEST : " + updSQL);
 				System.out.println("--------------------");
 				statement.execute(updSQL);
 			}
@@ -118,16 +121,17 @@ public class MyDBDriver {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void updateRecord(ArrayList<String> fields, ArrayList<String> values, int user_id) {
 		try (Statement statement = connect.createStatement()) {
 
 			String updSQL = "";
-			
+
 			for (int i = 0; i < fields.size(); i++) {
-				updSQL = "UPDATE " + tableName + " SET " + fields.get(i) + " = '" + values.get(i) + "' WHERE user_id = " + user_id ;
+				updSQL = "UPDATE " + tableName + " SET " + fields.get(i) + " = '" + values.get(i) + "' WHERE user_id = "
+						+ user_id;
 				System.out.println("--------------------");
-				System.out.println("UPDATE REQUEST : " +updSQL);
+				System.out.println("UPDATE REQUEST : " + updSQL);
 				System.out.println("--------------------");
 				statement.execute(updSQL);
 			}
@@ -148,6 +152,41 @@ public class MyDBDriver {
 		}
 	}
 
+	public void addRecord(JSONObject jObject) {
+		String firstName;
+		String lastName;
+		String birthDay;
+		String job;
+		String comment;
+
+		try {
+			if (jObject.length() == 5) {
+
+				firstName = jObject.getString("firstName");
+				lastName = jObject.getString("lastName");
+				birthDay = jObject.getString("birthDay");
+				job = jObject.getString("job");
+				comment = jObject.getString("comment");
+
+				addRecord(firstName, lastName, birthDay, job, comment);
+
+			} else {
+
+				firstName = jObject.getString("firstName");
+				lastName = jObject.getString("lastName");
+				job = jObject.getString("job");
+				comment = jObject.getString("comment");
+
+				addRecord(firstName, lastName, job, comment);
+
+			}
+		} catch (JSONException e) {
+			System.out.println("Exception from metod MyDriver.addrecord (JSONObject o)");
+			e.printStackTrace();
+		}
+
+	}
+
 	public void addRecord(String firstName, String lastName, String birthDay, String job, String comment) {
 		try (Statement statement = connect.createStatement()) {
 			String addSQL = "INSERT INTO " + tableName + " (FIRSTNAME, LASTNAME, BIRTH_DAY, JOB, COMMENT)" + "VALUES('"
@@ -164,11 +203,11 @@ public class MyDBDriver {
 		 * addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
 		 */
 	}
-	
+
 	public void addRecord(String firstName, String lastName, String job, String comment) {
 		try (Statement statement = connect.createStatement()) {
-			String addSQL = "INSERT INTO " + tableName + " (FIRSTNAME, LASTNAME, JOB, COMMENT)" + "VALUES('"
-					+ firstName + "','" + lastName + "','" + job + "','" + comment + "')";
+			String addSQL = "INSERT INTO " + tableName + " (FIRSTNAME, LASTNAME, JOB, COMMENT)" + "VALUES('" + firstName
+					+ "','" + lastName + "','" + job + "','" + comment + "')";
 			statement.execute(addSQL);
 		} catch (SQLException e) {
 			System.out.println("Exception from method add");
@@ -192,25 +231,24 @@ public class MyDBDriver {
 			e.printStackTrace();
 		}
 	}
-/*
-	public static void main(String[] args) {
-		MyDBDriver my = new MyDBDriver();
+	/*
+	 * public static void main(String[] args) { MyDBDriver my = new
+	 * MyDBDriver();
+	 * 
+	 * for (int i = 0; i < 5; i++) {
+	 * 
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
+	 * my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy"); } }
+	 */
 
-		for (int i = 0; i < 5; i++) {
-
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
-			my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
-			my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-			my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-		}
-	}
-*/
 }
