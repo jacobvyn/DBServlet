@@ -1,6 +1,7 @@
 package trainingDB;
 
 import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,8 +35,6 @@ public class MyDBDriver {
 				Class.forName("org.postgresql.Driver");
 
 				connect = DriverManager.getConnection(dbURL, propertie.getLogin(), propertie.getPassword());
-				// connect = DriverManager.getConnection(dbURL, "postgres",
-				// "pass123");
 
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -62,12 +61,6 @@ public class MyDBDriver {
 
 	}
 
-	/*
-	 * public ResultSet getResultSet() { ResultSet rs = null; try { Statement
-	 * statement = connect.createStatement(); rs = statement.executeQuery(
-	 * "SELECT * FROM " + tableName); } catch (SQLException e) {
-	 * e.printStackTrace(); } return rs; }
-	 */
 	public JSONArray getJSONResultSet() {
 		if (connect == null) {
 			System.out.println("Connection ==null");
@@ -196,12 +189,7 @@ public class MyDBDriver {
 			System.out.println("Exception from method add");
 			e.printStackTrace();
 		}
-		/*
-		 * addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-		 * addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
-		 * addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
-		 * addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
-		 */
+
 	}
 
 	public void addRecord(String firstName, String lastName, String job, String comment) {
@@ -231,24 +219,22 @@ public class MyDBDriver {
 			e.printStackTrace();
 		}
 	}
+
 	/*
-	 * public static void main(String[] args) { MyDBDriver my = new
+	 * to fill DB public static void main(String[] args) { MyDBDriver my = new
 	 * MyDBDriver();
-	 * 
-	 * for (int i = 0; i < 5; i++) {
 	 * 
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * my.addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
 	 * my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
 	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
-	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy"); } }
+	 * mt.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
+	 * my.releaseResources(); }
 	 */
 
 }
