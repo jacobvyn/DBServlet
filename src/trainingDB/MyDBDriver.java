@@ -227,11 +227,11 @@ public class MyDBDriver {
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * my.addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
 	 * my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "ingeneer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * mt.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
 	 * my.releaseResources(); }

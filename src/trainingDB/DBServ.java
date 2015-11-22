@@ -3,6 +3,7 @@ package trainingDB;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
-
-//import com.google.gson.JsonArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @WebServlet(urlPatterns = { "/dbAdd", "/dbChange", "/dbDelete", "/dbGetData" })
 public class DBServ extends HttpServlet {
@@ -20,41 +21,77 @@ public class DBServ extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		request.setCharacterEncoding("utf8");
-		response.setCharacterEncoding("utf8");
+		request.setCharacterEncoding("utf-8");
+		response.setCharacterEncoding("utf-8");
 
 		String url = request.getRequestURI();
-		
-		
-		
+
 		// if add url
 		if (url.equalsIgnoreCase("/DBServlet/dbAdd")) {
 			
+			//System.out.println("Next query was performed from Servlet: " 
+			//		+ request.getRequestURI() + "\n When: " + new Date());
 			
+		
 			
-			String msg = readRequest(request);	
-			if (msg.length()==0)msg=" received nothing ";
-				response.getWriter().print("method doGET  :" +msg);	
-	
+
+			Enumeration<String> paramNames = request.getParameterNames();
+
+			JSONObject jObject = new JSONObject();
+			try {
+
+				while (paramNames.hasMoreElements()) {
+					String key = (String) paramNames.nextElement();
+					String value = request.getParameter(key);
+					jObject.put(key, value);
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			System.out.println("SERVLET : object from parametres : " +jObject);
+			response.getWriter().print("SERVLET : object from parametres : " +jObject);
+			
+			 if (!(jObject.length()==0)) {
+				 sendToDB(jObject);
+			 }
+			 
+			 /*
+			 InputStream in = request.getInputStream();
+			 
+			StringBuilder ob = new StringBuilder();
+			int c;
+			
+			while ((c=in.read())!=0) {
+				ob.append((char) c);
+			}
+				
+				System.out.println("object from stream : " +ob.toString());
+		*/
+			 
+
 		}
-		
-		
+
 		// if change url
 		else if (url.equalsIgnoreCase("/DBServlet/dbChange")) {
-			response.getWriter().print("Next query was performed from Servlet: " + request.getRequestURI() +"\n When: " + new Date());	
+			response.getWriter().print(
+					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
 		}
-		
+
 		// if delete url
 		else if (url.equalsIgnoreCase("/DBServlet/dbDelete")) {
-			response.getWriter().print("Next query was performed from Servlet: " + request.getRequestURI() +"\n When: " + new Date());
+			response.getWriter().print(
+					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
 		}
-		
-		// by uploading of application  
-				//working!!!
+
+		// by uploading of application
+		// working!!!
 		else if (url.equalsIgnoreCase("/DBServlet/dbGetData")) {
-			
-			System.out.println("Next query was performed from Servlet: " + request.getRequestURI() +"\n When: " + new Date());
-			
+
+			System.out.println("Next query was performed from Servlet: " 
+							+ request.getRequestURI() + "\n When: " + new Date());
+
 			response.setContentType("application/json");
 			MyDBDriver driver = new MyDBDriver();
 			JSONArray jrs = driver.getJSONResultSet();
@@ -68,35 +105,35 @@ public class DBServ extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
-		String msg = readRequest(request);	
-		if (msg.length()==0)msg=" received nothing ";
-			response.getWriter().print("method doPOST  :" +msg);	
-		
-		
+		super.doPost(request, response);
+
 	}
 
-	private String readRequest(HttpServletRequest request) {
+	private void sendToDB(JSONObject jObject) {
+		MyDBDriver driver = new MyDBDriver();
+		driver.addRecord(jObject);
+		driver.releaseResources();
 
-		String jString = "";
-
-		try {
-			
-			InputStream in = request.getInputStream();
-			
-			int c;
-			
-			while ((c=in.read())!=-1) {
-				jString +=(char) c;
-			}
-			
-			return jString;
-			
-		} catch (IOException e) {
-			System.out.println("smth wroooooooooooong");
-			e.printStackTrace();
-		}
-		return "EMPTY ((";
 	}
+
+	/*
+	 * private String readRequest(HttpServletRequest request) {
+	 * 
+	 * String jString = "";
+	 * 
+	 * try {
+	 * 
+	 * // InputStream in = request.getInputStream(); BufferedReader in =
+	 * request.getReader();
+	 * 
+	 * int c;
+	 * 
+	 * while ((c = in.read()) != -1) { jString += (char) c; }
+	 * 
+	 * return jString;
+	 * 
+	 * } catch (IOException e) { System.out.println("smth wroooooooooooong");
+	 * e.printStackTrace(); } return "EMPTY (("; }
+	 */
 
 }
