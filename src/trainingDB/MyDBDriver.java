@@ -62,10 +62,7 @@ public class MyDBDriver {
 	}
 
 	public JSONArray getJSONResultSet() {
-		if (connect == null) {
-			System.out.println("Connection ==null");
-		}
-
+		if (connect != null) {
 		JSONArray jArray = null;
 		try (Statement statement = connect.createStatement()) {
 			ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
@@ -74,15 +71,15 @@ public class MyDBDriver {
 				JSONObject jDB = new JSONObject();
 
 				jDB.put("USER_ID", rs.getInt(1));
-				jDB.put("FIRSTNAME", rs.getString("firstname"));
-				jDB.put("LASTNAME", rs.getString("lastname"));
+				jDB.put("FIRSTNAME", rs.getString(2));
+				jDB.put("LASTNAME", rs.getString(3));
 
 				DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-				String b_day = df.format(rs.getDate("birth_day"));
+				String b_day = df.format(rs.getDate(4));
 				jDB.put("BIRTH_DAY", b_day);
 
-				jDB.put("JOB", rs.getString("job"));
-				jDB.put("COMMENT", rs.getString("comment"));
+				jDB.put("JOB", rs.getString(5));
+				jDB.put("COMMENT", rs.getString(6));
 				jArray.put(jDB);
 			}
 			rs.close();
@@ -93,7 +90,11 @@ public class MyDBDriver {
 			System.out.println("Exception from method getJson");
 			e.printStackTrace();
 		}
-		return jArray;
+			return jArray;
+		} else {
+			System.out.println("Connection  is null");
+		}
+		return null;
 	}
 
 	public void updateRecord(String[] fields, String[] values, int user_id) {
@@ -146,33 +147,19 @@ public class MyDBDriver {
 	}
 
 	public void addRecord(JSONObject jObject) {
-		String firstName;
-		String lastName;
-		String birthDay;
-		String job;
-		String comment;
-
 		try {
-			if (jObject.length() == 5) {
-
-				firstName = jObject.getString("firstName");
-				lastName = jObject.getString("lastName");
-				birthDay = jObject.getString("birthDay");
-				job = jObject.getString("job");
-				comment = jObject.getString("comment");
-
-				addRecord(firstName, lastName, birthDay, job, comment);
-
-			} else {
-
-				firstName = jObject.getString("firstName");
-				lastName = jObject.getString("lastName");
-				job = jObject.getString("job");
-				comment = jObject.getString("comment");
-
+		String firstName= jObject.getString("firstName");
+		String lastName= jObject.getString("lastName");
+		String birthDay= jObject.getString("birthDay");
+		String job= jObject.getString("job");
+		String comment= jObject.getString("comment");
+		
+			if (birthDay.isEmpty() ) {
 				addRecord(firstName, lastName, job, comment);
-
+			} else {
+				addRecord(firstName, lastName, birthDay, job, comment);
 			}
+			
 		} catch (JSONException e) {
 			System.out.println("Exception from metod MyDriver.addrecord (JSONObject o)");
 			e.printStackTrace();

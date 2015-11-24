@@ -1,7 +1,9 @@
 package trainingDB;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.Date;
 import java.util.Enumeration;
 
@@ -28,15 +30,13 @@ public class DBServ extends HttpServlet {
 
 		// if add url
 		if (url.equalsIgnoreCase("/DBServlet/dbAdd")) {
-			
-			//System.out.println("Next query was performed from Servlet: " 
-			//		+ request.getRequestURI() + "\n When: " + new Date());
-			
-		
-			
-
+			response.getWriter().print(
+					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
+		 
 			Enumeration<String> paramNames = request.getParameterNames();
-
+			
+			String name = request.getParameter("firstName");
+			System.out.println(name);
 			JSONObject jObject = new JSONObject();
 			try {
 
@@ -46,17 +46,17 @@ public class DBServ extends HttpServlet {
 					jObject.put(key, value);
 				}
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
 			System.out.println("SERVLET : object from parametres : " +jObject);
-			response.getWriter().print("SERVLET : object from parametres : " +jObject);
+			response.getWriter().print("SERVLET : object from parametres 111: " +jObject +". name is :" +name);
 			
 			 if (!(jObject.length()==0)) {
 				 sendToDB(jObject);
 			 }
 			 
+			
 			 /*
 			 InputStream in = request.getInputStream();
 			 
@@ -86,19 +86,21 @@ public class DBServ extends HttpServlet {
 		}
 
 		// by uploading of application
-		// working!!!
 		else if (url.equalsIgnoreCase("/DBServlet/dbGetData")) {
-
-			System.out.println("Next query was performed from Servlet: " 
-							+ request.getRequestURI() + "\n When: " + new Date());
+			
+		
 
 			response.setContentType("application/json");
+			
 			MyDBDriver driver = new MyDBDriver();
 			JSONArray jrs = driver.getJSONResultSet();
-
-			response.getWriter().print(jrs);
-
+			
+			BufferedWriter out = new BufferedWriter(response.getWriter()) ;
+			out.write(jrs.toString());
+			out.close();
+			
 			driver.releaseResources();
+			
 		}
 
 	}
@@ -115,6 +117,8 @@ public class DBServ extends HttpServlet {
 		driver.releaseResources();
 
 	}
+	
+
 
 	/*
 	 * private String readRequest(HttpServletRequest request) {
