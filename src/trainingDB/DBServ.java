@@ -35,11 +35,8 @@ public class DBServ extends HttpServlet {
 		 
 			Enumeration<String> paramNames = request.getParameterNames();
 			
-			String name = request.getParameter("firstName");
-			System.out.println(name);
 			JSONObject jObject = new JSONObject();
 			try {
-
 				while (paramNames.hasMoreElements()) {
 					String key = (String) paramNames.nextElement();
 					String value = request.getParameter(key);
