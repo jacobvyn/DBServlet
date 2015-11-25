@@ -34,8 +34,8 @@ public class DBServ extends HttpServlet {
 					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
 		 
 			Enumeration<String> paramNames = request.getParameterNames();
-			
 			JSONObject jObject = new JSONObject();
+			
 			try {
 				while (paramNames.hasMoreElements()) {
 					String key = (String) paramNames.nextElement();
@@ -52,7 +52,6 @@ public class DBServ extends HttpServlet {
 			 if (!(jObject.length()==0)) {
 				 sendToDB(jObject);
 			 }
-			 
 			
 			 /*
 			 InputStream in = request.getInputStream();
@@ -84,9 +83,6 @@ public class DBServ extends HttpServlet {
 
 		// by uploading of application
 		else if (url.equalsIgnoreCase("/DBServlet/dbGetData")) {
-			
-		
-
 			response.setContentType("application/json");
 			
 			MyDBDriver driver = new MyDBDriver();
@@ -94,10 +90,9 @@ public class DBServ extends HttpServlet {
 			
 			BufferedWriter out = new BufferedWriter(response.getWriter()) ;
 			out.write(jrs.toString());
+			
 			out.close();
-			
 			driver.releaseResources();
-			
 		}
 
 	}
@@ -115,8 +110,6 @@ public class DBServ extends HttpServlet {
 
 	}
 	
-
-
 	/*
 	 * private String readRequest(HttpServletRequest request) {
 	 * 
