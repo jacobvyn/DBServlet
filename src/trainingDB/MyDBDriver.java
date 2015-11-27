@@ -1,15 +1,13 @@
 package trainingDB;
 
 import java.io.FileNotFoundException;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -63,33 +61,47 @@ public class MyDBDriver {
 
 	public JSONArray getJSONResultSet() {
 		if (connect != null) {
-		JSONArray jArray = null;
-		try (Statement statement = connect.createStatement()) {
-			ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
-			jArray = new JSONArray();
-			while (rs.next()) {
-				JSONObject jDB = new JSONObject();
+			JSONArray jArray = null;
+			try (Statement statement = connect.createStatement()) {
 
-				jDB.put("USER_ID", rs.getInt(1));
-				jDB.put("FIRSTNAME", rs.getString(2));
-				jDB.put("LASTNAME", rs.getString(3));
+				ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
+				ResultSetMetaData rsmd = rs.getMetaData();
 
-				DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-				String b_day = df.format(rs.getDate(4));
-				jDB.put("BIRTH_DAY", b_day);
+				JSONObject columnsName = new JSONObject();
+				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					columnsName.put("" + i, rsmd.getColumnName(i));
 
-				jDB.put("JOB", rs.getString(5));
-				jDB.put("COMMENT", rs.getString(6));
-				jArray.put(jDB);
+				}
+
+				jArray = new JSONArray();
+				while (rs.next()) {
+
+					JSONObject jDB = new JSONObject();
+
+					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+
+						String key = columnsName.getString(String.valueOf(i));
+						String value;
+
+						if (key.equals("birth_day")) {
+							value = rs.getDate(i).toString();
+						} else
+							value = String.valueOf(rs.getString(i));
+
+						jDB.put(key, value);
+					}
+					jArray.put(jDB);
+				}
+				rs.close();
+				jArray.put(columnsName);
+
+			} catch (SQLException e) {
+				System.out.println("Exception from method getJson (sql...)");
+				e.printStackTrace();
+			} catch (JSONException e) {
+				System.out.println("Exception from method getJson");
+				e.printStackTrace();
 			}
-			rs.close();
-		} catch (SQLException e) {
-			System.out.println("Exception from method getJson");
-			e.printStackTrace();
-		} catch (JSONException e) {
-			System.out.println("Exception from method getJson");
-			e.printStackTrace();
-		}
 			return jArray;
 		} else {
 			System.out.println("Connection  is null");
@@ -148,18 +160,18 @@ public class MyDBDriver {
 
 	public void addRecord(JSONObject jObject) {
 		try {
-		String firstName= jObject.getString("firstName");
-		String lastName= jObject.getString("lastName");
-		String birthDay= jObject.getString("birthDay");
-		String job= jObject.getString("job");
-		String comment= jObject.getString("comment");
-		
-			if (birthDay.isEmpty() ) {
+			String firstName = jObject.getString("firstName");
+			String lastName = jObject.getString("lastName");
+			String birthDay = jObject.getString("birthDay");
+			String job = jObject.getString("job");
+			String comment = jObject.getString("comment");
+
+			if (birthDay.isEmpty()) {
 				addRecord(firstName, lastName, job, comment);
 			} else {
 				addRecord(firstName, lastName, birthDay, job, comment);
 			}
-			
+
 		} catch (JSONException e) {
 			System.out.println("Exception from metod MyDriver.addrecord (JSONObject o)");
 			e.printStackTrace();
@@ -206,6 +218,12 @@ public class MyDBDriver {
 			e.printStackTrace();
 		}
 	}
+
+	/*
+	 * public static void main(String[] args) { MyDBDriver m = new MyDBDriver();
+	 * JSONArray a= m.getJSONResultSet(); m.releaseResources(); }
+	 * 
+	 */
 
 	/*
 	 * to fill DB public static void main(String[] args) { MyDBDriver my = new

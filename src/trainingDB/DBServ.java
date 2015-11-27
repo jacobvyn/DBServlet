@@ -2,8 +2,6 @@ package trainingDB;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
 import java.util.Date;
 import java.util.Enumeration;
 
@@ -34,12 +32,9 @@ public class DBServ extends HttpServlet {
 					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
 		 
 			Enumeration<String> paramNames = request.getParameterNames();
-			
-			String name = request.getParameter("firstName");
-			System.out.println(name);
 			JSONObject jObject = new JSONObject();
+			
 			try {
-
 				while (paramNames.hasMoreElements()) {
 					String key = (String) paramNames.nextElement();
 					String value = request.getParameter(key);
@@ -50,27 +45,23 @@ public class DBServ extends HttpServlet {
 			}
 
 			System.out.println("SERVLET : object from parametres : " +jObject);
-			response.getWriter().print("SERVLET : object from parametres 111: " +jObject +". name is :" +name);
+			response.getWriter().print("SERVLET : object from parametres 111: " +jObject);
 			
+			//add object to db if it is not a null
 			 if (!(jObject.length()==0)) {
 				 sendToDB(jObject);
 			 }
-			 
-			
 			 /*
-			 InputStream in = request.getInputStream();
-			 
-			StringBuilder ob = new StringBuilder();
-			int c;
+			 try ( InputStream in = request.getInputStream()){
+				 StringBuilder ob = new StringBuilder();
+				 int c;
 			
-			while ((c=in.read())!=0) {
-				ob.append((char) c);
-			}
+				 while ((c=in.read())!=0) {
+					 ob.append((char) c);
+				 }
+				 System.out.println("object from stream : " +ob.toString());
+			 }	*/
 				
-				System.out.println("object from stream : " +ob.toString());
-		*/
-			 
-
 		}
 
 		// if change url
