@@ -51,10 +51,7 @@ public class DBServ extends HttpServlet {
 			 if (!(jObject.length()==0)) {
 				 sendToDB(jObject);
 			 }
-<<<<<<< HEAD
-=======
-			
->>>>>>> origin/master
+
 			 /*
 			 try ( InputStream in = request.getInputStream()){
 				 StringBuilder ob = new StringBuilder();
