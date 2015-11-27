@@ -51,6 +51,10 @@ public class DBServ extends HttpServlet {
 			 if (!(jObject.length()==0)) {
 				 sendToDB(jObject);
 			 }
+<<<<<<< HEAD
+=======
+			
+>>>>>>> origin/master
 			 /*
 			 try ( InputStream in = request.getInputStream()){
 				 StringBuilder ob = new StringBuilder();
@@ -78,9 +82,6 @@ public class DBServ extends HttpServlet {
 
 		// by uploading of application
 		else if (url.equalsIgnoreCase("/DBServlet/dbGetData")) {
-			
-		
-
 			response.setContentType("application/json");
 			
 			MyDBDriver driver = new MyDBDriver();
@@ -88,10 +89,9 @@ public class DBServ extends HttpServlet {
 			
 			BufferedWriter out = new BufferedWriter(response.getWriter()) ;
 			out.write(jrs.toString());
+			
 			out.close();
-			
 			driver.releaseResources();
-			
 		}
 
 	}
@@ -109,8 +109,6 @@ public class DBServ extends HttpServlet {
 
 	}
 	
-
-
 	/*
 	 * private String readRequest(HttpServletRequest request) {
 	 * 
