@@ -84,9 +84,8 @@ public class MyDBDriver {
 						String value;
 
 						if (key.equals("birth_day")) {
-							value = rs.getDate(i).toString();
-						} else
-							value = String.valueOf(rs.getString(i));
+								value = rs.getDate(i).toString();
+						} else	value = String.valueOf(rs.getString(i));
 
 						jDB.put(key, value);
 					}
@@ -154,6 +153,27 @@ public class MyDBDriver {
 
 		} catch (SQLException e) {
 			System.out.println("Exception from method delete");
+			e.printStackTrace();
+		}
+	}
+	
+	
+
+	public void deleteRecord(JSONObject jObject) {
+		
+		
+		try (Statement statement = connect.createStatement()) {
+			String personToDel;
+			personToDel = jObject.getString("toDelete")  ;
+			
+			String deleteSQL = "DELETE FROM " + tableName + " WHERE user_id=" + personToDel;
+			statement.execute(deleteSQL);
+
+		} catch (SQLException e) {
+			System.out.println("Exception from method delete");
+			e.printStackTrace();
+		} catch (JSONException e) {
+			System.out.println("Something wrong with deleting in db  (from MyDBDriver");
 			e.printStackTrace();
 		}
 	}
