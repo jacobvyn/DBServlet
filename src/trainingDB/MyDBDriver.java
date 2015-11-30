@@ -75,17 +75,15 @@ public class MyDBDriver {
 
 				jArray = new JSONArray();
 				while (rs.next()) {
-
 					JSONObject jDB = new JSONObject();
-
 					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
 
 						String key = columnsName.getString(String.valueOf(i));
 						String value;
-
 						if (key.equals("birth_day")) {
-								value = rs.getDate(i).toString();
-						} else	value = String.valueOf(rs.getString(i));
+							value = rs.getDate(i).toString();
+						} else
+							value = String.valueOf(rs.getString(i));
 
 						jDB.put(key, value);
 					}
@@ -93,7 +91,6 @@ public class MyDBDriver {
 				}
 				rs.close();
 				jArray.put(columnsName);
-
 			} catch (SQLException e) {
 				System.out.println("Exception from method getJson (sql...)");
 				e.printStackTrace();
@@ -146,6 +143,47 @@ public class MyDBDriver {
 		}
 	}
 
+	/// ---------------------------------------
+	public void updateRecord(JSONObject jObject) {
+		try (Statement statement = connect.createStatement()) {
+
+			// get user id that has to be changed and remove this record from jObject
+			String user_id = jObject.getString("user_id");
+			jObject.remove("user_id");
+
+			StringBuilder updSQL = new StringBuilder();
+
+			String[] keysNames = JSONObject.getNames(jObject);
+			
+			for (String field : keysNames) {
+				
+				String value = jObject.getString(field);
+
+				updSQL.append("UPDATE ");
+				updSQL.append(tableName);
+				updSQL.append(" SET ");
+				updSQL.append(field);
+				updSQL.append(" = '");
+				updSQL.append(value);
+				updSQL.append("' WHERE user_id = ");
+				updSQL.append(user_id);
+				updSQL.append("");
+				updSQL.append("");
+				
+			
+				System.out.println(" request to change is : " +updSQL.toString());
+				statement.execute(updSQL.toString());
+				updSQL.delete(0, updSQL.length());
+			}
+		} catch (SQLException e) {
+			System.out.println("Exception from method MyDriver.update");
+			e.printStackTrace();
+		} catch (JSONException e) {
+			System.out.println("Excpetion in metod MyDBDriver.updateRecord(JSONObject jObject)");
+			e.printStackTrace();
+		}
+	}
+
 	public void deleteRecord(int personToDel) {
 		try (Statement statement = connect.createStatement()) {
 			String deleteSQL = "DELETE FROM " + tableName + " WHERE user_id=" + personToDel;
@@ -156,16 +194,12 @@ public class MyDBDriver {
 			e.printStackTrace();
 		}
 	}
-	
-	
 
 	public void deleteRecord(JSONObject jObject) {
-		
-		
+
 		try (Statement statement = connect.createStatement()) {
-			String personToDel;
-			personToDel = jObject.getString("toDelete")  ;
-			
+			String personToDel = jObject.getString("toDelete");
+
 			String deleteSQL = "DELETE FROM " + tableName + " WHERE user_id=" + personToDel;
 			statement.execute(deleteSQL);
 

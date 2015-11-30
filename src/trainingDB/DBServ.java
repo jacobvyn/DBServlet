@@ -20,23 +20,21 @@ import jdk.nashorn.internal.scripts.JO;
 @WebServlet(urlPatterns = { "/dbAdd", "/dbChange", "/dbDelete", "/dbGetData" })
 public class DBServ extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
+	private static final String ADD = "/DBServlet/dbAdd";
+	private static final String CHANGE = "/DBServlet/dbChange";
+	private static final String DELETE = "/DBServlet/dbDelete";
+	private static final String GET_DATA = "/DBServlet/dbGetData";
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
 
-		String url = request.getRequestURI();
+		JSONObject jObject = new JSONObject();
+		Enumeration<String> paramNames = request.getParameterNames();
 
-		// if add url
-		if (url.equalsIgnoreCase("/DBServlet/dbAdd")) {
-			// response.getWriter().print(
-			// "Next query was performed from Servlet: " +
-			// request.getRequestURI() + "\n When: " + new Date());
-
-			Enumeration<String> paramNames = request.getParameterNames();
-			JSONObject jObject = new JSONObject();
-
+		if (!(paramNames == null)) {
 			try {
 				while (paramNames.hasMoreElements()) {
 					String key = (String) paramNames.nextElement();
@@ -46,6 +44,12 @@ public class DBServ extends HttpServlet {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
+		}
+
+		String url = request.getRequestURI();
+
+		// if add url
+		if (url.equalsIgnoreCase(DBServ.ADD)) {
 
 			System.out.println("SERVLET : received object from parametres : " + jObject);
 
@@ -55,44 +59,28 @@ public class DBServ extends HttpServlet {
 			} else {
 				System.out.println("You want to add an empty record....");
 			}
-
 		}
 
 		// if change url
-		else if (url.equalsIgnoreCase("/DBServlet/dbChange")) {
-			response.getWriter().print(
-					"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
+		else if (url.equalsIgnoreCase(DBServ.CHANGE)) {
+
+			if (!(jObject.length() == 0)) {
+				changeInDB(jObject);
+			}
+
 		}
 
 		// if delete url
-		else if (url.equalsIgnoreCase("/DBServlet/dbDelete")) {
+		else if (url.equalsIgnoreCase(DBServ.DELETE)) {
 
-			Enumeration<String> paramNames = request.getParameterNames();
-			JSONObject jObject = new JSONObject();
-
-			try {
-				while (paramNames.hasMoreElements()) {
-					String key = (String) paramNames.nextElement();
-					String value = request.getParameter(key);
-					jObject.put(key, value);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-			// add object to db if it is not a null
 			if (!(jObject.length() == 0)) {
 				deleteInDB(jObject);
-			} else {
-				System.out.println("You want to add an empty record....");
 			}
-
-			//response.getWriter().print(
-				//	"Next query was performed from Servlet: " + request.getRequestURI() + "\n When: " + new Date());
 		}
 
 		// by uploading of application
-		else if (url.equalsIgnoreCase("/DBServlet/dbGetData")) {
+		else if (url.equalsIgnoreCase(DBServ.GET_DATA)) {
+			
 			response.setContentType("application/json");
 
 			MyDBDriver driver = new MyDBDriver();
@@ -119,17 +107,20 @@ public class DBServ extends HttpServlet {
 		driver.releaseResources();
 
 	}
-	
+
 	private void deleteInDB(JSONObject jObject) {
 		MyDBDriver driver = new MyDBDriver();
 		driver.deleteRecord(jObject);
 		driver.releaseResources();
 
 	}
-	
-	
-	
-	
+
+	private void changeInDB(JSONObject jObject) {
+		MyDBDriver driver = new MyDBDriver();
+		driver.updateRecord(jObject);
+		driver.releaseResources();
+
+	}
 
 	/*
 	 * private String readRequest(HttpServletRequest request) {
