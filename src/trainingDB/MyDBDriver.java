@@ -65,18 +65,18 @@ public class MyDBDriver {
 			try (Statement statement = connect.createStatement()) {
 
 				ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
-				ResultSetMetaData rsmd = rs.getMetaData();
+				ResultSetMetaData rsMetaData = rs.getMetaData();
 
 				JSONObject columnsName = new JSONObject();
-				for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-					columnsName.put("" + i, rsmd.getColumnName(i));
-
+				for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+					columnsName.put(String.valueOf(i), rsMetaData.getColumnName(i));
+					
 				}
 
 				jArray = new JSONArray();
 				while (rs.next()) {
 					JSONObject jDB = new JSONObject();
-					for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
 
 						String key = columnsName.getString(String.valueOf(i));
 						String value;
@@ -84,13 +84,14 @@ public class MyDBDriver {
 							value = rs.getDate(i).toString();
 						} else
 							value = String.valueOf(rs.getString(i));
-
 						jDB.put(key, value);
 					}
 					jArray.put(jDB);
 				}
 				rs.close();
+				//add columns' names to jasonArray as last
 				jArray.put(columnsName);
+				
 			} catch (SQLException e) {
 				System.out.println("Exception from method getJson (sql...)");
 				e.printStackTrace();
@@ -286,11 +287,11 @@ public class MyDBDriver {
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * my.addRecord("Alesha", "Popovich", "1018-12-22", "wariaor", "speedy");
 	 * my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-09-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-09-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * my.addRecord("Jacob", "Vin", "1986-06-06", "Engineer", "yet");
+	 * my.addRecord("Jacob", "Vin", "1986-09-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * mt.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
 	 * my.releaseResources(); }

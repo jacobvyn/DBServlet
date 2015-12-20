@@ -1,8 +1,9 @@
 package trainingDB;
 
 import java.io.BufferedWriter;
+
 import java.io.IOException;
-import java.util.Date;
+
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
@@ -15,7 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import jdk.nashorn.internal.scripts.JO;
+
 
 @WebServlet(urlPatterns = { "/dbAdd", "/dbChange", "/dbDelete", "/dbGetData" })
 public class DBServ extends HttpServlet {
@@ -122,24 +123,5 @@ public class DBServ extends HttpServlet {
 
 	}
 
-	/*
-	 * private String readRequest(HttpServletRequest request) {
-	 * 
-	 * String jString = "";
-	 * 
-	 * try {
-	 * 
-	 * // InputStream in = request.getInputStream(); BufferedReader in =
-	 * request.getReader();
-	 * 
-	 * int c;
-	 * 
-	 * while ((c = in.read()) != -1) { jString += (char) c; }
-	 * 
-	 * return jString;
-	 * 
-	 * } catch (IOException e) { System.out.println("smth wroooooooooooong");
-	 * e.printStackTrace(); } return "EMPTY (("; }
-	 */
 
 }
