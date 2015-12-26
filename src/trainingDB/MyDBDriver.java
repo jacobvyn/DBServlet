@@ -1,6 +1,7 @@
 package trainingDB;
 
 import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -70,7 +71,7 @@ public class MyDBDriver {
 				JSONObject columnsName = new JSONObject();
 				for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
 					columnsName.put(String.valueOf(i), rsMetaData.getColumnName(i));
-					
+
 				}
 
 				jArray = new JSONArray();
@@ -89,9 +90,9 @@ public class MyDBDriver {
 					jArray.put(jDB);
 				}
 				rs.close();
-				//add columns' names to jasonArray as last
+				// add columns' names to jasonArray as last
 				jArray.put(columnsName);
-				
+
 			} catch (SQLException e) {
 				System.out.println("Exception from method getJson (sql...)");
 				e.printStackTrace();
@@ -106,76 +107,21 @@ public class MyDBDriver {
 		return null;
 	}
 
-	public void updateRecord(String[] fields, String[] values, int user_id) {
-		try (Statement statement = connect.createStatement()) {
+	// ----------------------------------------------------------------------------
 
-			String updSQL = "";
-
-			for (int i = 0; i < fields.length; i++) {
-				updSQL = "UPDATE " + tableName + " SET " + fields[i] + " = '" + values[i] + "' WHERE user_id = "
-						+ user_id;
-				System.out.println("--------------------");
-				System.out.println("UPDATE REQUEST : " + updSQL);
-				System.out.println("--------------------");
-				statement.execute(updSQL);
-			}
-		} catch (SQLException e) {
-			System.out.println("Exception from method MyDriver.update");
-			e.printStackTrace();
-		}
-	}
-
-	public void updateRecord(ArrayList<String> fields, ArrayList<String> values, int user_id) {
-		try (Statement statement = connect.createStatement()) {
-
-			String updSQL = "";
-
-			for (int i = 0; i < fields.size(); i++) {
-				updSQL = "UPDATE " + tableName + " SET " + fields.get(i) + " = '" + values.get(i) + "' WHERE user_id = "
-						+ user_id;
-				System.out.println("--------------------");
-				System.out.println("UPDATE REQUEST : " + updSQL);
-				System.out.println("--------------------");
-				statement.execute(updSQL);
-			}
-		} catch (SQLException e) {
-			System.out.println("Exception from method MyDriver.update");
-			e.printStackTrace();
-		}
-	}
-
-	/// ---------------------------------------
 	public void updateRecord(JSONObject jObject) {
 		try (Statement statement = connect.createStatement()) {
 
-			// get user id that has to be changed and remove this record from jObject
+			// get user id that has to be changed and remove this record from
+			// jObject
 			String user_id = jObject.getString("user_id");
 			jObject.remove("user_id");
 
-			StringBuilder updSQL = new StringBuilder();
+			String updSQL = makeUpdateSQL(jObject, user_id);
 
-			String[] keysNames = JSONObject.getNames(jObject);
-			
-			for (String field : keysNames) {
-				
-				String value = jObject.getString(field);
+			System.out.println(" request to change is : " + updSQL);
+			statement.execute(updSQL);
 
-				updSQL.append("UPDATE ");
-				updSQL.append(tableName);
-				updSQL.append(" SET ");
-				updSQL.append(field);
-				updSQL.append(" = '");
-				updSQL.append(value);
-				updSQL.append("' WHERE user_id = ");
-				updSQL.append(user_id);
-				updSQL.append("");
-				updSQL.append("");
-				
-			
-				System.out.println(" request to change is : " +updSQL.toString());
-				statement.execute(updSQL.toString());
-				updSQL.delete(0, updSQL.length());
-			}
 		} catch (SQLException e) {
 			System.out.println("Exception from method MyDriver.update");
 			e.printStackTrace();
@@ -185,78 +131,133 @@ public class MyDBDriver {
 		}
 	}
 
-	public void deleteRecord(int personToDel) {
-		try (Statement statement = connect.createStatement()) {
-			String deleteSQL = "DELETE FROM " + tableName + " WHERE user_id=" + personToDel;
-			statement.execute(deleteSQL);
-
-		} catch (SQLException e) {
-			System.out.println("Exception from method delete");
-			e.printStackTrace();
-		}
-	}
-
-	public void deleteRecord(JSONObject jObject) {
+	public void deleteRecord(JSONObject recordToDel) {
+		String deleteSQL = makeDeleteSQL(recordToDel);
 
 		try (Statement statement = connect.createStatement()) {
-			String personToDel = jObject.getString("toDelete");
-
-			String deleteSQL = "DELETE FROM " + tableName + " WHERE user_id=" + personToDel;
 			statement.execute(deleteSQL);
-
 		} catch (SQLException e) {
 			System.out.println("Exception from method delete");
-			e.printStackTrace();
-		} catch (JSONException e) {
-			System.out.println("Something wrong with deleting in db  (from MyDBDriver");
 			e.printStackTrace();
 		}
 	}
 
 	public void addRecord(JSONObject jObject) {
+		String[] keys = JSONObject.getNames(jObject);
+		ArrayList<String> values = getValuesFromJSON(jObject);
+
+		String addSQL = makeAddSQL(keys, values);
+		System.out.println("Hello from new method, sql =  " + addSQL);
+		try (Statement statement = connect.createStatement()) {
+			statement.execute(addSQL);
+		} catch (SQLException e) {
+			System.out.println("Exception from method add");
+			e.printStackTrace();
+		}
+	}
+
+	// ----------------------------------------------------------------------------
+	private String makeDeleteSQL(JSONObject o) {
+		StringBuilder deleteSQL = new StringBuilder();
+
 		try {
-			String firstName = jObject.getString("firstName");
-			String lastName = jObject.getString("lastName");
-			String birthDay = jObject.getString("birthDay");
-			String job = jObject.getString("job");
-			String comment = jObject.getString("comment");
-
-			if (birthDay.isEmpty()) {
-				addRecord(firstName, lastName, job, comment);
-			} else {
-				addRecord(firstName, lastName, birthDay, job, comment);
-			}
-
+			deleteSQL.append("DELETE FROM ");
+			deleteSQL.append(tableName);
+			deleteSQL.append(" WHERE user_id=");
+			deleteSQL.append(o.getString("toDelete"));
 		} catch (JSONException e) {
-			System.out.println("Exception from metod MyDriver.addrecord (JSONObject o)");
+			System.out.println("Exception from makeDeleteSQL");
 			e.printStackTrace();
 		}
 
+		return deleteSQL.toString();
+
 	}
 
-	public void addRecord(String firstName, String lastName, String birthDay, String job, String comment) {
-		try (Statement statement = connect.createStatement()) {
-			String addSQL = "INSERT INTO " + tableName + " (FIRSTNAME, LASTNAME, BIRTH_DAY, JOB, COMMENT)" + "VALUES('"
-					+ firstName + "','" + lastName + "','" + birthDay + "','" + job + "','" + comment + "')";
-			statement.execute(addSQL);
-		} catch (SQLException e) {
-			System.out.println("Exception from method add");
-			e.printStackTrace();
+	private String makeUpdateSQL(JSONObject jObject, String user_id) {
+		String[] fieldsNames = JSONObject.getNames(jObject);
+		ArrayList<String> valuesList = getValuesFromJSON(jObject);
+
+		String fields = makeColumnsForSQL(fieldsNames);
+		String vaules = makeValuesForSQL(valuesList);
+		
+		StringBuilder updSQL = new StringBuilder();
+		updSQL.append("UPDATE ");
+		updSQL.append(tableName);
+		updSQL.append(" SET ");
+		updSQL.append(fields);
+		updSQL.append(" = ");
+		updSQL.append(vaules);
+		updSQL.append(" WHERE user_id = ");
+		updSQL.append(user_id);
+
+		return updSQL.toString();
+
+	}
+
+	private String makeAddSQL(String[] keys, ArrayList<String> val) {
+		String columns = makeColumnsForSQL(keys);
+		String values = makeValuesForSQL(val);
+
+		StringBuilder addSQL = new StringBuilder();
+
+		addSQL.append("INSERT INTO ");
+		addSQL.append(tableName);
+		addSQL.append(" ");
+		addSQL.append(columns);
+		addSQL.append(" VALUES ");
+		addSQL.append(values);
+
+		return addSQL.toString();
+
+	}
+
+	// ----------------------------------------------------------------------------
+
+	private String makeColumnsForSQL(String[] keys) {
+		StringBuilder keysStr = new StringBuilder();
+		keysStr.append("(");
+		for (String s : keys) {
+			keysStr.append(s);
+			keysStr.append(", ");
 		}
+		keysStr.deleteCharAt(keysStr.length() - 1);
+		keysStr.deleteCharAt(keysStr.length() - 1);
+		keysStr.append(")");
+		return keysStr.toString();
 
 	}
 
-	public void addRecord(String firstName, String lastName, String job, String comment) {
-		try (Statement statement = connect.createStatement()) {
-			String addSQL = "INSERT INTO " + tableName + " (FIRSTNAME, LASTNAME, JOB, COMMENT)" + "VALUES('" + firstName
-					+ "','" + lastName + "','" + job + "','" + comment + "')";
-			statement.execute(addSQL);
-		} catch (SQLException e) {
-			System.out.println("Exception from method add");
-			e.printStackTrace();
+	private String makeValuesForSQL(ArrayList<String> values) {
+		StringBuilder valuesStr = new StringBuilder();
+		valuesStr.append("('");
+		for (String s : values) {
+			valuesStr.append(s);
+			valuesStr.append("', '");
 		}
+		valuesStr.deleteCharAt(valuesStr.length() - 1);
+		valuesStr.deleteCharAt(valuesStr.length() - 1);
+		valuesStr.deleteCharAt(valuesStr.length() - 1);
+		valuesStr.append(")");
+		return valuesStr.toString();
+
 	}
 
+	private ArrayList<String> getValuesFromJSON(JSONObject jObject) {
+		ArrayList<String> values = new ArrayList<>();
+		for (String s : JSONObject.getNames(jObject)) {
+			try {
+				values.add(jObject.getString(s));
+			} catch (JSONException e) {
+				System.out.println("Exception from getValuesFromJSON");
+				e.printStackTrace();
+			}
+		}
+		return values;
+
+	}
+
+	// ----------------------------------------------------------------------------
 	@SuppressWarnings("unused")
 	private void createTable() {
 		try (Statement statement = connect.createStatement()) {
@@ -275,13 +276,7 @@ public class MyDBDriver {
 	}
 
 	/*
-	 * public static void main(String[] args) { MyDBDriver m = new MyDBDriver();
-	 * JSONArray a= m.getJSONResultSet(); m.releaseResources(); }
-	 * 
-	 */
-
-	/*
-	 * to fill DB public static void main(String[] args) { MyDBDriver my = new
+	 * public static void main(String[] args) { MyDBDriver my = new
 	 * MyDBDriver();
 	 * 
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
@@ -293,8 +288,7 @@ public class MyDBDriver {
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
 	 * my.addRecord("Jacob", "Vin", "1986-09-06", "Engineer", "yet");
 	 * my.addRecord("Vasya", "Pupkin", "1990-12-21", "player", "bad guy");
-	 * mt.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
+	 * my.addRecord("ILiya", "Muromec", "1012-08-03", "wariaor", "strong");
 	 * my.releaseResources(); }
 	 */
-
 }

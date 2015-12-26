@@ -115,7 +115,8 @@ public class DBServ extends HttpServlet {
 		driver.releaseResources();
 
 	}
-
+	
+	//finished
 	private void changeInDB(JSONObject jObject) {
 		MyDBDriver driver = new MyDBDriver();
 		driver.updateRecord(jObject);
