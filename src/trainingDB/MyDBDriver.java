@@ -59,6 +59,20 @@ public class MyDBDriver {
 		}
 
 	}
+	
+	private JSONObject getColumnsNames(ResultSetMetaData rsMetaData) {
+		JSONObject columnsName = new JSONObject();
+		try {
+			for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+				columnsName.put(String.valueOf(i), rsMetaData.getColumnName(i));
+			}
+		} catch (SQLException | JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return columnsName;
+		
+	}
 
 	public JSONArray getJSONResultSet() {
 		if (connect != null) {
@@ -68,12 +82,9 @@ public class MyDBDriver {
 				ResultSet rs = statement.executeQuery("SELECT * FROM " + tableName);
 				ResultSetMetaData rsMetaData = rs.getMetaData();
 
-				JSONObject columnsName = new JSONObject();
-				for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
-					columnsName.put(String.valueOf(i), rsMetaData.getColumnName(i));
-
-				}
-
+				//make object with columns name
+				JSONObject columnsName =getColumnsNames(rsMetaData);
+				
 				jArray = new JSONArray();
 				while (rs.next()) {
 					JSONObject jDB = new JSONObject();
@@ -147,7 +158,7 @@ public class MyDBDriver {
 		ArrayList<String> values = getValuesFromJSON(jObject);
 
 		String addSQL = makeAddSQL(keys, values);
-		System.out.println("Hello from new method, sql =  " + addSQL);
+		System.out.println("sql =  " + addSQL);
 		try (Statement statement = connect.createStatement()) {
 			statement.execute(addSQL);
 		} catch (SQLException e) {

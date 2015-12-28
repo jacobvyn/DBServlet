@@ -16,12 +16,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-
 @WebServlet(urlPatterns = { "/dbAdd", "/dbChange", "/dbDelete", "/dbGetData" })
 public class DBServ extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String ADD = "/DBServlet/dbAdd";
 	private static final String CHANGE = "/DBServlet/dbChange";
 	private static final String DELETE = "/DBServlet/dbDelete";
@@ -81,7 +79,7 @@ public class DBServ extends HttpServlet {
 
 		// by uploading of application
 		else if (url.equalsIgnoreCase(DBServ.GET_DATA)) {
-			
+
 			response.setContentType("application/json");
 
 			MyDBDriver driver = new MyDBDriver();
@@ -115,14 +113,13 @@ public class DBServ extends HttpServlet {
 		driver.releaseResources();
 
 	}
-	
-	//finished
+
+	// finished
 	private void changeInDB(JSONObject jObject) {
 		MyDBDriver driver = new MyDBDriver();
 		driver.updateRecord(jObject);
 		driver.releaseResources();
 
 	}
-
 
 }
