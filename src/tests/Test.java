@@ -1,21 +1,16 @@
 package tests;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
-import trainingDB.HiberDAO;
-import trainingDB.Person;
 
 public class Test {
 
 	
 	public static void main(String[] args) {
+		/*
 		String s = "abs";
 		System.out.println(s.contains("ab"));
 	Person pers = new Person("Oleg", "Pikulenko", "2000-12-02", "trader", "good fellow");
@@ -40,6 +35,7 @@ public class Test {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+	
 	Method [] methods = pers.getClass().getDeclaredMethods();
 
 	ArrayList<Method> mets= HiberDAO.leaveOnlySetters(methods);
@@ -47,6 +43,7 @@ public class Test {
 	for (Method method : mets) {
 		System.out.println(method);
 	}
+	*/
 	/*
 	for (Method method : methods) {
 		System.out.println(method.getName());

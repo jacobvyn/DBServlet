@@ -66,7 +66,7 @@ public class HiberDAO {
 		try {
 			id = jObject.getInt("toDelete");
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
@@ -102,13 +102,12 @@ public class HiberDAO {
 			}
 
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return names;
 	}
 
-	public String[] getColumnNamesAsStrings() {
+	public static String[] getColumnNamesAsStrings() {
 		ClassMetadata classMetaData = factory.getClassMetadata(Person.class);
 
 		return classMetaData.getPropertyNames();
@@ -117,7 +116,7 @@ public class HiberDAO {
 	public JSONArray listToJsonArray(List<Person> persons) {
 		JSONArray jArray = new JSONArray();
 		try {
-			// String[] metaData = hiberDAO.getColumnNamesAsStrings();
+			getColumnNamesAsStrings();
 			for (Person pers : persons) {
 				JSONObject jObject = new JSONObject();
 
@@ -132,7 +131,6 @@ public class HiberDAO {
 			}
 			jArray.put(getColumnNamesAsJSON());
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return jArray;
@@ -143,7 +141,8 @@ public class HiberDAO {
 		Person pers = null;
 		try {
 			pers = new Person(jObject.getString("FIRSTNAME"), jObject.getString("LASTNAME"),
-					makeDateFromString("BIRTHDAY"), jObject.getString("JOB"), jObject.getString("COMMENT"));
+					makeDateFromString(jObject.getString("BIRTHDAY")), jObject.getString("JOB"),
+					jObject.getString("COMMENT"));
 		} catch (JSONException e) {
 			System.out.println("Exception by creating Person");
 			e.printStackTrace();
@@ -176,7 +175,7 @@ public class HiberDAO {
 
 			jObject.remove("user_id");
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 		System.out.println("[HiberDAO] " + jObject);
@@ -190,25 +189,12 @@ public class HiberDAO {
 				Person person = session.get(Person.class, id);
 
 				ArrayList<Method> methods = leaveOnlySetters(person.getClass().getDeclaredMethods());
-				/*
-				 * for (Method method : methods) {
-				 * System.out.println(method.getName()); System.out.println(
-				 * "Parameter class :    "); for (Parameter param :
-				 * method.getParameters()) { System.out.println("   "
-				 * +param.getParameterizedType().getTypeName());
-				 * 
-				 * } System.out.println("---------"); }
-				 */
 
 				for (String name : JSONObject.getNames(jObject)) {
 					String value = jObject.getString(name);
 					Method met = methods.get(getIndexOfOppropriateMethod(methods, name));
 					met.setAccessible(true);
-					/*
-					 * System.out.println("filed : " + name);
-					 * System.out.println("value : " + value);
-					 * System.out.println("Method name : " + met.getName());
-					 */
+
 					if (name.equalsIgnoreCase("BIRTHDAY")) {
 						Date birthDay = makeDateFromString(value);
 						met.invoke(person, birthDay);
@@ -217,11 +203,7 @@ public class HiberDAO {
 					}
 
 				}
-
-				////////////////////
 				session.update(person);
-				/////////////////////
-
 				tx.commit();
 			} catch (HibernateException e) {
 				if (tx != null)
@@ -289,7 +271,7 @@ public class HiberDAO {
 			date = sdf.parse(value);
 
 		} catch (ParseException ex) {
-			// ex.printStackTrace();
+			ex.printStackTrace();
 		}
 		return date;
 	}
