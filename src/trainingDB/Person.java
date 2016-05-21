@@ -1,12 +1,24 @@
 package trainingDB;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 
 /**
  * Created by Jacob on 13.05.2016.
  */
 public class Person {
 
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY, generator="pers_id_seq")
+	@SequenceGenerator(name="pers_id_seq", sequenceName="pers_id_seq", allocationSize=1)
+	@Column(name="user_id")
     private int id;
     private String firstName;
     private String lastName;
@@ -25,6 +37,15 @@ public class Person {
         this.job = job;
         this.comment = comment;
     }
+    
+    public Person(String firstName, String lastName, String birthDay, String job, String comment) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthDay = makeDateFromString(birthDay);
+        this.job = job;
+        this.comment = comment;
+    }
+
 
     public int getId() {
         return id;
@@ -57,6 +78,10 @@ public class Person {
     public void setBirthDay(Date birthDay) {
         this.birthDay = birthDay;
     }
+    
+    public void setBirthDay(String birthDay) {
+        this.birthDay = makeDateFromString(birthDay);
+    }
 
     public String getJob() {
         return job;
@@ -74,6 +99,27 @@ public class Person {
         this.comment = comment;
     }
 
+    public String toString() {
+    	
+		return "[" +getFirstName() +", " +getLastName() +", " +getBirthDay() +", " +getJob() +", " +getComment() +"]";
+		
+	}
+    
+    
+    public static Date makeDateFromString(String value) {
+
+		String format = "yyyy-mm-dd";
+
+		Date date = null;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(format);
+			date = sdf.parse(value);
+		
+		} catch (ParseException ex) {
+			// ex.printStackTrace();
+		}
+		return date;
+	}
 
 
 }

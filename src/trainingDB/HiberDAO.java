@@ -1,5 +1,10 @@
 package trainingDB;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,8 +17,6 @@ import org.hibernate.metadata.ClassMetadata;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import com.google.gson.JsonObject;
 
 public class HiberDAO {
 	private static SessionFactory factory = null;
@@ -135,22 +138,18 @@ public class HiberDAO {
 		return jArray;
 	}
 
-
 	public void addPersonToDB(JSONObject jObject) {
-		System.out.println(jObject);
+
 		Person pers = null;
 		try {
-			pers = new Person(jObject.getString("FIRSTNAME"),
-					jObject.getString("LASTNAME"),
-					////////////////////////////////////////////////////////////////
-					new Date(),
-					jObject.getString("JOB"),
-					jObject.getString("COMMENT"));
+			pers = new Person(jObject.getString("FIRSTNAME"), jObject.getString("LASTNAME"),
+					makeDateFromString("BIRTHDAY"), jObject.getString("JOB"), jObject.getString("COMMENT"));
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Exception by creating Person");
 			e.printStackTrace();
 		}
-
+		if (pers == null)
+			System.out.println("Person is  null");
 		Session session = factory.openSession();
 		Transaction tx = null;
 		try {
@@ -167,5 +166,131 @@ public class HiberDAO {
 			session.close();
 		}
 
+	}
+
+	public void updateInDB(JSONObject jObject) {
+
+		String str_id = null;
+		try {
+			str_id = jObject.getString("user_id");
+
+			jObject.remove("user_id");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("[HiberDAO] " + jObject);
+		if (jObject.length() != 0) {
+
+			Integer id = Integer.valueOf(str_id);
+			Session session = factory.openSession();
+			Transaction tx = null;
+			try {
+				tx = session.beginTransaction();
+				Person person = session.get(Person.class, id);
+
+				ArrayList<Method> methods = leaveOnlySetters(person.getClass().getDeclaredMethods());
+				/*
+				 * for (Method method : methods) {
+				 * System.out.println(method.getName()); System.out.println(
+				 * "Parameter class :    "); for (Parameter param :
+				 * method.getParameters()) { System.out.println("   "
+				 * +param.getParameterizedType().getTypeName());
+				 * 
+				 * } System.out.println("---------"); }
+				 */
+
+				for (String name : JSONObject.getNames(jObject)) {
+					String value = jObject.getString(name);
+					Method met = methods.get(getIndexOfOppropriateMethod(methods, name));
+					met.setAccessible(true);
+					/*
+					 * System.out.println("filed : " + name);
+					 * System.out.println("value : " + value);
+					 * System.out.println("Method name : " + met.getName());
+					 */
+					if (name.equalsIgnoreCase("BIRTHDAY")) {
+						Date birthDay = makeDateFromString(value);
+						met.invoke(person, birthDay);
+					} else {
+						met.invoke(person, value);
+					}
+
+				}
+
+				////////////////////
+				session.update(person);
+				/////////////////////
+
+				tx.commit();
+			} catch (HibernateException e) {
+				if (tx != null)
+					tx.rollback();
+				System.out.println("HibernateException");
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				System.out.println("IllegalAccessException");
+
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				System.out.println("IllegalArgumentException");
+
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				System.out.println("InvocationTargetException");
+
+				e.printStackTrace();
+			} catch (JSONException e) {
+				System.out.println("JSONException");
+
+				e.printStackTrace();
+			} catch (Exception e) {
+				System.out.println("Appropriate method is not found");
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+
+		}
+	}
+
+	private int getIndexOfOppropriateMethod(ArrayList<Method> methods, String name) throws Exception {
+
+		for (int i = 0; i < methods.size(); i++) {
+			String methodName = methods.get(i).getName();
+
+			if (methodName.toLowerCase().contains(name.toLowerCase())) {
+				return i;
+			}
+		}
+		throw new Exception("Appropriate method is not found");
+	}
+
+	public static ArrayList<Method> leaveOnlySetters(Method[] mts) {
+
+		ArrayList<Method> methods = new ArrayList<>();
+
+		for (int i = 0; i < mts.length; i++) {
+			Method method = mts[i];
+			if (method.getName().contains("set")) {
+				methods.add(method);
+			}
+		}
+		return methods;
+	}
+
+	public static Date makeDateFromString(String value) {
+
+		String format = "yyyy-mm-dd";
+
+		Date date = null;
+		try {
+			SimpleDateFormat sdf = new SimpleDateFormat(format);
+			date = sdf.parse(value);
+
+		} catch (ParseException ex) {
+			// ex.printStackTrace();
+		}
+		return date;
 	}
 }

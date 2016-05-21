@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 import java.util.Enumeration;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -60,12 +59,12 @@ public class MyDBServlet extends HttpServlet {
 		// if add url
 		if (url.equalsIgnoreCase(MyDBServlet.ADD)) {
 
-			System.out.println("SERVLET : received object from parametres : " + jObject);
+			System.out.println();
+			System.out.println("[MyDBServlet] : received object from parameters : " + jObject);
 
 			// add object to db if it is not a null
 			if (!(jObject.length() == 0)) {
-			hiberDAO.addPersonToDB(jObject);
-				//addToDB(jObject);
+				hiberDAO.addPersonToDB(jObject);
 			} else {
 				System.out.println("You want to add an empty record....");
 			}
@@ -75,7 +74,7 @@ public class MyDBServlet extends HttpServlet {
 		else if (url.equalsIgnoreCase(MyDBServlet.CHANGE)) {
 
 			if (!(jObject.length() == 0)) {
-				changeInDB(jObject);
+				hiberDAO.updateInDB(jObject);
 			}
 
 		}
@@ -87,7 +86,7 @@ public class MyDBServlet extends HttpServlet {
 
 		// by uploading of application
 		else if (url.equalsIgnoreCase(MyDBServlet.GET_DATA)) {
-			System.out.println("from servlet");
+
 			response.setContentType("application/json");
 
 			JSONArray persons = hiberDAO.listPersonsFromDB();
@@ -103,29 +102,5 @@ public class MyDBServlet extends HttpServlet {
 		super.doPost(request, response);
 
 	}
-
-	private void addToDB(JSONObject jObject) {
-		MyDBDriver driver = new MyDBDriver();
-		driver.addRecord(jObject);
-		driver.releaseResources();
-
-	}
-/*
-	private void deleteInDB(JSONObject jObject) {
-		MyDBDriver driver = new MyDBDriver();
-		driver.deleteRecord(jObject);
-		driver.releaseResources();
-
-	}
-*/
-	// finished
-	private void changeInDB(JSONObject jObject) {
-		MyDBDriver driver = new MyDBDriver();
-		driver.updateRecord(jObject);
-		driver.releaseResources();
-
-	}
-
-	
 
 }
