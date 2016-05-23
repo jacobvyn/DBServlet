@@ -29,9 +29,7 @@ public class MyDBServlet extends HttpServlet {
 
 	@Override
 	public void init() throws ServletException {
-
 		hiberDAO = new HiberDAO();
-
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -56,43 +54,40 @@ public class MyDBServlet extends HttpServlet {
 
 		String url = request.getRequestURI();
 
-		// if add url
-		if (url.equalsIgnoreCase(MyDBServlet.ADD)) {
+		switch (url) {
+		case MyDBServlet.ADD:
 
-			System.out.println();
-			System.out.println("[MyDBServlet] : received object from parameters : " + jObject);
-
-			// add object to db if it is not a null
 			if (!(jObject.length() == 0)) {
 				hiberDAO.addPersonToDB(jObject);
 			} else {
 				System.out.println("You want to add an empty record....");
 			}
-		}
+			break;
 
-		// if change url
-		else if (url.equalsIgnoreCase(MyDBServlet.CHANGE)) {
+		case MyDBServlet.CHANGE:
 
 			if (!(jObject.length() == 0)) {
 				hiberDAO.updateInDB(jObject);
 			}
+			break;
 
-		}
+		case MyDBServlet.DELETE:
 
-		// if delete url
-		else if (url.equalsIgnoreCase(MyDBServlet.DELETE)) {
 			hiberDAO.deleteFromDB(jObject);
-		}
+			break;
 
-		// by uploading of application
-		else if (url.equalsIgnoreCase(MyDBServlet.GET_DATA)) {
+		case MyDBServlet.GET_DATA:
 
 			response.setContentType("application/json");
-
 			JSONArray persons = hiberDAO.listPersonsFromDB();
+
 			BufferedWriter out = new BufferedWriter(response.getWriter());
 			out.write(persons.toString());
 			out.close();
+			break;
+
+		default:
+			break;
 		}
 
 	}
