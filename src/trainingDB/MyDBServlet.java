@@ -25,11 +25,11 @@ public class MyDBServlet extends HttpServlet {
 	private static final String DELETE = "/DBServlet/dbDelete";
 	private static final String GET_DATA = "/DBServlet/dbGetData";
 
-	private PersonDAOImpl personDAO = null;
+	private PersonDAO dao = null;
 
 	@Override
 	public void init() throws ServletException {
-		personDAO = new PersonDAOImpl();
+		dao = new PersonDAOImpl();
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -58,7 +58,7 @@ public class MyDBServlet extends HttpServlet {
 		case MyDBServlet.ADD:
 
 			if (!(jObject.length() == 0)) {
-				personDAO.create(jObject);
+				dao.create(jObject);
 			} else {
 				System.out.println("You want to add an empty record....");
 			}
@@ -67,19 +67,19 @@ public class MyDBServlet extends HttpServlet {
 		case MyDBServlet.CHANGE:
 
 			if (!(jObject.length() == 0)) {
-				personDAO.update(jObject);
+				dao.update(jObject);
 			}
 			break;
 
 		case MyDBServlet.DELETE:
 
-			personDAO.delete(jObject);
+			dao.delete(jObject);
 			break;
 
 		case MyDBServlet.GET_DATA:
 
 			response.setContentType("application/json");
-			JSONArray persons = personDAO.list();
+			JSONArray persons = dao.jsonArrList();
 
 			BufferedWriter out = new BufferedWriter(response.getWriter());
 			out.write(persons.toString());

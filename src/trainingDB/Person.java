@@ -1,5 +1,6 @@
 package trainingDB;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -11,7 +12,7 @@ import javax.persistence.SequenceGenerator;
 /**
  * Created by Jacob on 13.05.2016.
  */
-public class Person {
+public class Person implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "pers_id_seq")

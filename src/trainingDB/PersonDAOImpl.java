@@ -17,9 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class PersonDAOImpl implements PersonDAO {
 	private static SessionFactory factory = null;
 
@@ -32,9 +29,15 @@ public class PersonDAOImpl implements PersonDAO {
 		}
 	}
 
+	@Override
+	public JSONArray jsonArrList() {
+		List<Person> persons = list();
+		return listToJsonArray(persons);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public JSONArray list() {
+	public List<Person> list() {
 		List<Person> persons = null;
 		Session session = factory.openSession();
 		Transaction tx = null;
@@ -51,7 +54,8 @@ public class PersonDAOImpl implements PersonDAO {
 		} finally {
 			session.close();
 		}
-		return listToJsonArray(persons);
+		// makeTest(persons);
+		return persons;
 	}
 
 	@Override
@@ -60,7 +64,6 @@ public class PersonDAOImpl implements PersonDAO {
 		try {
 			id = jObject.getInt("toDelete");
 		} catch (JSONException e) {
-
 			e.printStackTrace();
 		}
 
@@ -244,34 +247,19 @@ public class PersonDAOImpl implements PersonDAO {
 				jArray.put(jObject);
 			}
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		jArray.put(getColumnNamesAsJSON());
 		return jArray;
 	}
-
-	private JSONArray listToJsonArrayNEW(List<Person> persons) {
+/*
+	private JSONArray listToJsonArrayNew(List<Person> persons) {
 		JSONArray jArray = new JSONArray();
-		Gson gson = new GsonBuilder().create();
-
-		for (Person person : persons) {
-			String jsonStr = gson.toJson(person);
-			try {
-				jArray.put(new JSONObject(jsonStr));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+		for (Person pers : persons) {
+			jArray.put(new JSONObject(pers));
 		}
+		jArray.put(getColumnNamesAsJSON());
 		return jArray;
 	}
-	
-	private void makeTest() {
-		
-		
-		
-		
-		
-	}
-
+*/
 }
