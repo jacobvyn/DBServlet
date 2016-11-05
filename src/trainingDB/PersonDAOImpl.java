@@ -1,6 +1,5 @@
 package trainingDB;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,28 +17,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class HiberDAO {
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class PersonDAOImpl implements PersonDAO {
 	private static SessionFactory factory = null;
 
-	public HiberDAO() {
-		initilize();
-	}
-
-	private void initilize() {
+	public PersonDAOImpl() {
 		try {
 			factory = new Configuration().configure().buildSessionFactory();
-
-		} catch (Exception e) {
+		} catch (HibernateException e) {
 			System.out.println("Exception by creating session factory!");
 			e.printStackTrace();
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
-	public JSONArray listPersonsFromDB() {
+	@Override
+	public JSONArray list() {
 		List<Person> persons = null;
-
 		Session session = factory.openSession();
 		Transaction tx = null;
 
@@ -48,7 +44,6 @@ public class HiberDAO {
 			persons = session.createQuery("From Person").list();
 
 			tx.commit();
-
 		} catch (HibernateException e) {
 			if (tx != null)
 				tx.rollback();
@@ -56,12 +51,11 @@ public class HiberDAO {
 		} finally {
 			session.close();
 		}
-
 		return listToJsonArray(persons);
-
 	}
 
-	public void deleteFromDB(JSONObject jObject) {
+	@Override
+	public void delete(JSONObject jObject) {
 		Integer id = null;
 		try {
 			id = jObject.getInt("toDelete");
@@ -89,54 +83,8 @@ public class HiberDAO {
 
 	}
 
-	public JSONObject getColumnNamesAsJSON() {
-		ClassMetadata classMetaData = factory.getClassMetadata(Person.class);
-
-		JSONObject names = new JSONObject();
-		String[] columnsNames = classMetaData.getPropertyNames();
-		try {
-			names.put("0", classMetaData.getIdentifierPropertyName());
-
-			for (int i = 0; i < columnsNames.length; i++) {
-				names.put(String.valueOf(i + 1), columnsNames[i]);
-			}
-
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return names;
-	}
-
-	public static String[] getColumnNamesAsStrings() {
-		ClassMetadata classMetaData = factory.getClassMetadata(Person.class);
-
-		return classMetaData.getPropertyNames();
-	}
-
-	public JSONArray listToJsonArray(List<Person> persons) {
-		JSONArray jArray = new JSONArray();
-		try {
-			getColumnNamesAsStrings();
-			for (Person pers : persons) {
-				JSONObject jObject = new JSONObject();
-
-				jObject.put("id", String.valueOf(pers.getId()));
-				jObject.put("firstName", pers.getFirstName());
-				jObject.put("lastName", pers.getLastName());
-				jObject.put("birthDay", pers.getBirthDay().toString());
-				jObject.put("job", pers.getJob());
-				jObject.put("comment", pers.getComment());
-
-				jArray.put(jObject);
-			}
-			jArray.put(getColumnNamesAsJSON());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return jArray;
-	}
-
-	public void addPersonToDB(JSONObject jObject) {
+	@Override
+	public void create(JSONObject jObject) {
 
 		Person pers = null;
 		try {
@@ -167,7 +115,8 @@ public class HiberDAO {
 
 	}
 
-	public void updateInDB(JSONObject jObject) {
+	@Override
+	public void update(JSONObject jObject) {
 
 		String str_id = null;
 		try {
@@ -201,7 +150,6 @@ public class HiberDAO {
 					} else {
 						met.invoke(person, value);
 					}
-
 				}
 				session.update(person);
 				tx.commit();
@@ -210,24 +158,8 @@ public class HiberDAO {
 					tx.rollback();
 				System.out.println("HibernateException");
 				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				System.out.println("IllegalAccessException");
-
-				e.printStackTrace();
-			} catch (IllegalArgumentException e) {
-				System.out.println("IllegalArgumentException");
-
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				System.out.println("InvocationTargetException");
-
-				e.printStackTrace();
-			} catch (JSONException e) {
-				System.out.println("JSONException");
-
-				e.printStackTrace();
 			} catch (Exception e) {
-				System.out.println("Appropriate method is not found");
+				System.out.println("IllegalAccessException");
 				e.printStackTrace();
 			} finally {
 				session.close();
@@ -248,7 +180,7 @@ public class HiberDAO {
 		throw new Exception("Appropriate method is not found");
 	}
 
-	public static ArrayList<Method> leaveOnlySetters(Method[] mts) {
+	private static ArrayList<Method> leaveOnlySetters(Method[] mts) {
 
 		ArrayList<Method> methods = new ArrayList<>();
 
@@ -261,7 +193,7 @@ public class HiberDAO {
 		return methods;
 	}
 
-	public static Date makeDateFromString(String value) {
+	private static Date makeDateFromString(String value) {
 
 		String format = "yyyy-mm-dd";
 
@@ -275,4 +207,71 @@ public class HiberDAO {
 		}
 		return date;
 	}
+
+	private JSONObject getColumnNamesAsJSON() {
+		ClassMetadata classMetaData = factory.getClassMetadata(Person.class);
+
+		JSONObject names = new JSONObject();
+		String[] columnsNames = classMetaData.getPropertyNames();
+		try {
+			names.put("0", classMetaData.getIdentifierPropertyName());
+
+			for (int i = 0; i < columnsNames.length; i++) {
+				names.put(String.valueOf(i + 1), columnsNames[i]);
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return names;
+	}
+
+	private JSONArray listToJsonArray(List<Person> persons) {
+		JSONArray jArray = new JSONArray();
+
+		try {
+			for (Person pers : persons) {
+
+				JSONObject jObject = new JSONObject();
+
+				jObject.put("id", String.valueOf(pers.getId()));
+				jObject.put("firstName", pers.getFirstName());
+				jObject.put("lastName", pers.getLastName());
+				jObject.put("birthDay", pers.getBirthDay().toString());
+				jObject.put("job", pers.getJob());
+				jObject.put("comment", pers.getComment());
+
+				jArray.put(jObject);
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		jArray.put(getColumnNamesAsJSON());
+		return jArray;
+	}
+
+	private JSONArray listToJsonArrayNEW(List<Person> persons) {
+		JSONArray jArray = new JSONArray();
+		Gson gson = new GsonBuilder().create();
+
+		for (Person person : persons) {
+			String jsonStr = gson.toJson(person);
+			try {
+				jArray.put(new JSONObject(jsonStr));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+		}
+		return jArray;
+	}
+	
+	private void makeTest() {
+		
+		
+		
+		
+		
+	}
+
 }
