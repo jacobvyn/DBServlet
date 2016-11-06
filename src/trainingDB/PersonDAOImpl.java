@@ -17,6 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 public class PersonDAOImpl implements PersonDAO {
 	private static SessionFactory factory = null;
 
@@ -32,8 +33,10 @@ public class PersonDAOImpl implements PersonDAO {
 	@Override
 	public JSONArray jsonArrList() {
 		List<Person> persons = list();
-		return listToJsonArray(persons);
+		JSONArray array =listToJsonArray(persons);
+		return array;
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -54,7 +57,6 @@ public class PersonDAOImpl implements PersonDAO {
 		} finally {
 			session.close();
 		}
-		// makeTest(persons);
 		return persons;
 	}
 
@@ -252,7 +254,7 @@ public class PersonDAOImpl implements PersonDAO {
 		jArray.put(getColumnNamesAsJSON());
 		return jArray;
 	}
-/*
+
 	private JSONArray listToJsonArrayNew(List<Person> persons) {
 		JSONArray jArray = new JSONArray();
 		for (Person pers : persons) {
@@ -261,5 +263,5 @@ public class PersonDAOImpl implements PersonDAO {
 		jArray.put(getColumnNamesAsJSON());
 		return jArray;
 	}
-*/
+
 }
