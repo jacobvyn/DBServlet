@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 @WebServlet(urlPatterns = { "/dbChange", "/dbGetData" })
 public class MyDBServlet extends HttpServlet {
@@ -28,13 +29,21 @@ public class MyDBServlet extends HttpServlet {
 		dao = new PersonDAOImpl();
 	}
 
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		setCharacterEncoding("utf-8", request, response);
 
+		// response.setContentType("text/x-json");
 		response.setContentType("application/json");
 		List<Person> list = dao.list();
+		System.out.println("SERVLET : ");
+		for (Person person : list) {
+			System.out.println(person);
+		}
+
 		JSONArray persons = toJsonArr(list);
+		System.out.println("--------------------");
 
 		BufferedWriter out = new BufferedWriter(response.getWriter());
 		out.write(persons.toString());
@@ -42,6 +51,7 @@ public class MyDBServlet extends HttpServlet {
 
 	}
 
+	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		setCharacterEncoding("utf-8", request, response);
@@ -74,6 +84,7 @@ public class MyDBServlet extends HttpServlet {
 
 	}
 
+	//////////////////
 	private Person toPerson(String message) {
 		Gson gson = new Gson();
 		Person person = gson.fromJson(message, Person.class);
@@ -106,9 +117,10 @@ public class MyDBServlet extends HttpServlet {
 
 	private JSONArray toJsonArr(List<Person> list) {
 		JSONArray array = new JSONArray();
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
 		for (Person person : list) {
 			String jsonStr = gson.toJson(person);
+			System.out.println(jsonStr);
 			try {
 				JSONObject obj = new JSONObject(jsonStr);
 				array.put(obj);
