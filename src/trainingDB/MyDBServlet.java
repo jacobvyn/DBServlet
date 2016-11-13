@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.*;
 import javax.servlet.annotation.WebServlet;
@@ -34,21 +35,15 @@ public class MyDBServlet extends HttpServlet {
 			throws ServletException, IOException {
 		setCharacterEncoding("utf-8", request, response);
 
-		// response.setContentType("text/x-json");
 		response.setContentType("application/json");
 		List<Person> list = dao.list();
-		System.out.println("SERVLET : ");
-		for (Person person : list) {
-			System.out.println(person);
-		}
 
 		JSONArray persons = toJsonArr(list);
-		System.out.println("--------------------");
 
 		BufferedWriter out = new BufferedWriter(response.getWriter());
 		out.write(persons.toString());
 		out.close();
-
+		System.out.println("======> Data is transmitted successfully <======= " +new Date());
 	}
 
 	@Override
@@ -120,7 +115,7 @@ public class MyDBServlet extends HttpServlet {
 		Gson gson = new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
 		for (Person person : list) {
 			String jsonStr = gson.toJson(person);
-			System.out.println(jsonStr);
+			// System.out.println(jsonStr);
 			try {
 				JSONObject obj = new JSONObject(jsonStr);
 				array.put(obj);

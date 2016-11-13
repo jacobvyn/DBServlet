@@ -12,7 +12,7 @@ import javax.persistence.SequenceGenerator;
 /**
  * Created by Jacob on 13.05.2016.
  */
-public class Person implements Serializable{
+public class Person implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "pers_id_seq")
