@@ -43,7 +43,7 @@ public class MyDBServlet extends HttpServlet {
 		BufferedWriter out = new BufferedWriter(response.getWriter());
 		out.write(persons.toString());
 		out.close();
-		System.out.println("======> Data is transmitted successfully <======= " +new Date());
+		System.out.println("======> Data is transmitted successfully <======= " + new Date());
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class MyDBServlet extends HttpServlet {
 
 	private JSONArray toJsonArr(List<Person> list) {
 		JSONArray array = new JSONArray();
-		Gson gson = new GsonBuilder().setDateFormat("yyyy-mm-dd").create();
+		Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
 		for (Person person : list) {
 			String jsonStr = gson.toJson(person);
 			// System.out.println(jsonStr);
